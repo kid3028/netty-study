@@ -1,13 +1,21 @@
 package com.qull.netty.cmd.client;
 
+import com.qull.netty.cmd.client.handler.LoginResponseHandler;
+import com.qull.netty.cmd.client.handler.MessageResponseHandler;
+import com.qull.netty.cmd.codec.PacketDecoder;
+import com.qull.netty.cmd.codec.PacketEncoder;
+import com.qull.netty.cmd.codec.Spliter;
+import com.qull.netty.cmd.entity.MessageRequestPacket;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.time.LocalDateTime;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,9 +34,16 @@ public class NettyClient {
                 // 指定IO类型为NIO
                 .channel(NioSocketChannel.class)
                 // IO处理逻辑
-                .handler(new ChannelInitializer<SocketChannel>() {
+                .handler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(NioSocketChannel ch) throws Exception {
+                        ch.pipeline()
+//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 7, 4))
+                                .addLast(new Spliter())
+                                .addLast(new PacketDecoder())
+                                .addLast(new LoginResponseHandler())
+                                .addLast(new MessageResponseHandler())
+                                .addLast(new PacketEncoder());
                     }
                 });
 //        bootstrap.connect("localhost", 8888).addListener(future -> {
@@ -38,7 +53,7 @@ public class NettyClient {
 //                System.out.println("连接失败");
 //            }
 //        });
-        connect(bootstrap,"localhost", 8888, MAX_RETRY);
+        connect(bootstrap,"localhost", 9999, MAX_RETRY);
     }
 
 
@@ -46,6 +61,8 @@ public class NettyClient {
         bootstrap.connect(host, port).addListener(future -> {
             if(future.isSuccess()) {
                 System.out.println("连接成功");
+                Channel channel = ((ChannelFuture) future).channel();
+                startConsoleThread(channel);
             }else if(retry == 0) {
                 System.out.println("重试次数已用完，放弃连接");
             }else {
@@ -58,5 +75,18 @@ public class NettyClient {
                         ()-> connect(bootstrap, host, port, retry), delay, TimeUnit.SECONDS);
             }
         });
+    }
+
+    private static void startConsoleThread(Channel channel) {
+        new Thread(() -> {
+            while (!Thread.interrupted()) {
+//                if(LoginUtil.hasLogin(channel)) {
+                    System.out.println("输入消息发送至服务器:");
+                    Scanner sc = new Scanner(System.in);
+                    String line = sc.nextLine();
+                    channel.writeAndFlush(new MessageRequestPacket(line));
+                }
+//            }
+        }).start();
     }
 }

@@ -1,11 +1,19 @@
 package com.qull.netty.cmd.server;
 
+import com.qull.netty.cmd.codec.PacketDecoder;
+import com.qull.netty.cmd.codec.PacketEncoder;
+import com.qull.netty.cmd.codec.Spliter;
+import com.qull.netty.cmd.server.handler.AuthHandler;
+import com.qull.netty.cmd.server.handler.LoginRequestHandler;
+import com.qull.netty.cmd.server.handler.MessageRequestHandler;
+import com.qull.netty.cmd.server.handler.StatisticsHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +33,21 @@ public class NettyServer {
         serverBootstrap
                 .group(bossGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<NioServerSocketChannel>() {
+                .option(ChannelOption.SO_BACKLOG, 1024)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(NioServerSocketChannel ch) throws Exception {
+                    protected void initChannel(NioSocketChannel ch) throws Exception {
+                        ch.pipeline()
+//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 7, 4))
+                                .addLast(new Spliter())
+                                .addLast(new StatisticsHandler())
+                                .addLast(new PacketDecoder())
+                                .addLast(new LoginRequestHandler())
+                                .addLast(new AuthHandler())
+                                .addLast(new MessageRequestHandler())
+                                .addLast(new PacketEncoder());
                     }
                 });
 //        serverBootstrap.bind(8888);
@@ -42,7 +62,7 @@ public class NettyServer {
 //            }
 //        });
 
-        bind(serverBootstrap, 1000);
+        bind(serverBootstrap, 9999);
     }
 
     public static void bind(final ServerBootstrap serverBootstrap, final int port) {

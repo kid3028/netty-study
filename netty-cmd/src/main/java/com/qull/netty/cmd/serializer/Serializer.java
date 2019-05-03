@@ -27,4 +27,8 @@ public interface Serializer {
      * @return
      */
     <T> T deserialize(Class<T> clazz, byte[] bytes);
+
+    byte JSON_SERIALIZER = 1;
+
+    Serializer DEFAULT = new JSONSerializer();
 }
