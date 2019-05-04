@@ -2,6 +2,8 @@ package com.qull.netty.cmd.codec;
 
 import com.qull.netty.cmd.constants.Command;
 import com.qull.netty.cmd.entity.*;
+import com.qull.netty.cmd.entity.request.*;
+import com.qull.netty.cmd.entity.response.*;
 import com.qull.netty.cmd.serializer.JSONSerializer;
 import com.qull.netty.cmd.serializer.Serializer;
 import io.netty.buffer.ByteBuf;
@@ -28,6 +30,17 @@ public class PacketCodec {
         PACKET_TYPE_MAP.put(Command.LOGIN_RESPONSE, LoginResponsePacket.class);
         PACKET_TYPE_MAP.put(Command.MESSAGE_REQUEST, MessageRequestPacket.class);
         PACKET_TYPE_MAP.put(Command.MESSAGE_RESPONSE, MessageResponsePacket.class);
+        PACKET_TYPE_MAP.put(Command.LOGOUT_REQUEST, LogoutRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.CREATE_GROUP_REQUEST, CreateGroupRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.CREATE_GROUP_RESPONSE, CreateGroupResponsePacket.class);
+        PACKET_TYPE_MAP.put(Command.JOIN_GROUP_REQUEST, JoinGroupRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.JOIN_GROUP_RESPONSE, JoinGroupResponsePacket.class);
+        PACKET_TYPE_MAP.put(Command.LIST_GROUP_MEMBER_REQUEST, ListGroupMembersRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.LIST_GROUP_MEMBER_RESPONSE, ListGroupMembersResponsePacket.class);
+        PACKET_TYPE_MAP.put(Command.QUIT_GROUP_REQUEST, QuitGroupRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.QUIT_GROUP_RESPONSE, QuitGroupResponsePacket.class);
+        PACKET_TYPE_MAP.put(Command.GROUP_MESSAGE_REQUEST, GroupMessageRequestPacket.class);
+        PACKET_TYPE_MAP.put(Command.GROUP_MESSAGE_RESPONSE, GroupMessageResponsePacket.class);
 
         SERIALIZER_MAP = new HashMap<>();
         Serializer serializer = new JSONSerializer();

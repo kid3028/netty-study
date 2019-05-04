@@ -1,6 +1,7 @@
-package com.qull.netty.cmd.entity;
+package com.qull.netty.cmd.entity.response;
 
 import com.qull.netty.cmd.constants.Command;
+import com.qull.netty.cmd.entity.Packet;
 import lombok.Data;
 
 /**
@@ -10,6 +11,10 @@ import lombok.Data;
  */
 @Data
 public class MessageResponsePacket extends Packet {
+
+    private String fromUserId;
+
+    private String fromUserName;
 
     private String message;
 

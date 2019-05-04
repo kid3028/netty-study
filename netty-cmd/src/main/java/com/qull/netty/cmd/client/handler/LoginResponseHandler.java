@@ -1,13 +1,10 @@
 package com.qull.netty.cmd.client.handler;
 
-import com.qull.netty.cmd.entity.LoginRequestPacket;
-import com.qull.netty.cmd.entity.LoginResponsePacket;
-import com.qull.netty.cmd.util.LoginUtil;
+import com.qull.netty.cmd.entity.response.LoginResponsePacket;
+import com.qull.netty.cmd.session.Session;
+import com.qull.netty.cmd.util.SessionUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.time.LocalDateTime;
-import java.util.Random;
 
 /**
  * @Description
@@ -17,25 +14,16 @@ import java.util.Random;
 public class LoginResponseHandler extends SimpleChannelInboundHandler<LoginResponsePacket> {
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        // 创建登录对象
-        LoginRequestPacket loginRequestPacket = new LoginRequestPacket();
-        loginRequestPacket.setUserId(new Random().nextInt(10000));
-        loginRequestPacket.setUsername("qull");
-        loginRequestPacket.setPassword("pwd");
-
-        // 写数据
-        ctx.channel().writeAndFlush(loginRequestPacket);
-    }
-
-    @Override
     protected void channelRead0(ChannelHandlerContext ctx, LoginResponsePacket loginResponsePacket) throws Exception {
+        String userId = loginResponsePacket.getUserId();
+        String userName = loginResponsePacket.getUserName();
+
         if(loginResponsePacket.isSuccess()) {
-            System.out.println(String.format("%s : 客户端登录成功", LocalDateTime.now()));
-            LoginUtil.markAsLogin(ctx.channel());
+            System.out.println(String.format("[%s]登录成功，userId为：%s", loginResponsePacket.getUserName(), loginResponsePacket.getUserId()));
+            SessionUtil.buildSession(new Session(userId, userName), ctx.channel());
             ctx.pipeline().remove(this);
         }else {
-            System.out.println(String.format("%s : 客户端登录失败，原因 : %s", LocalDateTime.now(), loginResponsePacket.getReason()));
+            System.out.println(String.format("[%s]登录失败，原因：%s", loginResponsePacket.getUserName(), loginResponsePacket.getReason()));
         }
     }
 

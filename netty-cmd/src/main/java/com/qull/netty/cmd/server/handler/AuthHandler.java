@@ -1,6 +1,6 @@
 package com.qull.netty.cmd.server.handler;
 
-import com.qull.netty.cmd.util.LoginUtil;
+import com.qull.netty.cmd.util.SessionUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -18,7 +18,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-        if(!LoginUtil.hasLogin(ctx.channel())) {
+        if(!SessionUtil.hasLogin(ctx.channel())) {
             ctx.channel().close();
         }else {
             // 移除登录校验
@@ -29,7 +29,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        if(LoginUtil.hasLogin(ctx.channel())) {
+        if(SessionUtil.hasLogin(ctx.channel())) {
             System.out.println("当前连接登录验证完毕，无需再次验证，AuthHandler被移除");
         }else {
             System.out.println("无登录验证， 强制关闭连接");

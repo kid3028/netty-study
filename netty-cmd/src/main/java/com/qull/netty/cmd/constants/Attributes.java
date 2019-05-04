@@ -1,5 +1,6 @@
 package com.qull.netty.cmd.constants;
 
+import com.qull.netty.cmd.session.Session;
 import io.netty.util.AttributeKey;
 
 /**
@@ -8,6 +9,5 @@ import io.netty.util.AttributeKey;
  * @Date 2019/4/30 22:39
  */
 public interface Attributes {
-    //  登录成功标识位
-    AttributeKey<Boolean> LOGIN = AttributeKey.newInstance("login");
+    AttributeKey<Session> SESSION = AttributeKey.newInstance("session");
 }

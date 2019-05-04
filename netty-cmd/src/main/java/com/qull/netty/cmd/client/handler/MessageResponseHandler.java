@@ -1,10 +1,8 @@
 package com.qull.netty.cmd.client.handler;
 
-import com.qull.netty.cmd.entity.MessageResponsePacket;
+import com.qull.netty.cmd.entity.response.MessageResponsePacket;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.time.LocalDateTime;
 
 /**
  * @Description
@@ -13,7 +11,10 @@ import java.time.LocalDateTime;
  */
 public class MessageResponseHandler extends SimpleChannelInboundHandler<MessageResponsePacket> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, MessageResponsePacket msg) throws Exception {
-        System.out.println(String.format("%s : 收到服务端的消息 : %s", LocalDateTime.now(), msg.getMessage()));
+    protected void channelRead0(ChannelHandlerContext ctx, MessageResponsePacket messageResponsePacket) throws Exception {
+        String fromUserId = messageResponsePacket.getFromUserId();
+        String fromUserName = messageResponsePacket.getFromUserName();
+
+        System.out.println(String.format("%s : %s -> %s", fromUserId, fromUserName, messageResponsePacket.getMessage()));
     }
 }

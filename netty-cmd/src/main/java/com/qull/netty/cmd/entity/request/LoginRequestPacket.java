@@ -1,6 +1,7 @@
-package com.qull.netty.cmd.entity;
+package com.qull.netty.cmd.entity.request;
 
 import com.qull.netty.cmd.constants.Command;
+import com.qull.netty.cmd.entity.Packet;
 import lombok.Data;
 
 /**

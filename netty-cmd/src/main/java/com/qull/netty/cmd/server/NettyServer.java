@@ -3,10 +3,7 @@ package com.qull.netty.cmd.server;
 import com.qull.netty.cmd.codec.PacketDecoder;
 import com.qull.netty.cmd.codec.PacketEncoder;
 import com.qull.netty.cmd.codec.Spliter;
-import com.qull.netty.cmd.server.handler.AuthHandler;
-import com.qull.netty.cmd.server.handler.LoginRequestHandler;
-import com.qull.netty.cmd.server.handler.MessageRequestHandler;
-import com.qull.netty.cmd.server.handler.StatisticsHandler;
+import com.qull.netty.cmd.server.handler.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -46,6 +43,12 @@ public class NettyServer {
                                 .addLast(new PacketDecoder())
                                 .addLast(new LoginRequestHandler())
                                 .addLast(new AuthHandler())
+                                .addLast(new LogoutRequestHandler())
+                                .addLast(new CreateGroupRequestHandler())
+                                .addLast(new JoinGroupRequestHandler())
+                                .addLast(new ListGroupMembersRequestHandler())
+                                .addLast(new QuitGroupRequestHandler())
+                                .addLast(new GroupMessageRequestHandler())
                                 .addLast(new MessageRequestHandler())
                                 .addLast(new PacketEncoder());
                     }
@@ -69,9 +72,9 @@ public class NettyServer {
         serverBootstrap.bind(port).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
-                if(future.isSuccess()) {
+                if (future.isSuccess()) {
                     System.out.println(String.format("端口[%s]绑定成功", port));
-                }else {
+                } else {
                     System.out.println(String.format("端口[%s]绑定失败", port));
                     bind(serverBootstrap, port + 1);
                 }

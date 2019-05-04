@@ -1,11 +1,12 @@
 package com.qull.netty.cmd.server.handler;
 
-import com.qull.netty.cmd.entity.MessageRequestPacket;
-import com.qull.netty.cmd.entity.MessageResponsePacket;
+import com.qull.netty.cmd.entity.request.MessageRequestPacket;
+import com.qull.netty.cmd.entity.response.MessageResponsePacket;
+import com.qull.netty.cmd.session.Session;
+import com.qull.netty.cmd.util.SessionUtil;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.time.LocalDateTime;
 
 /**
  * @Description
@@ -14,11 +15,24 @@ import java.time.LocalDateTime;
  */
 public class MessageRequestHandler extends SimpleChannelInboundHandler<MessageRequestPacket> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, MessageRequestPacket msg) throws Exception {
-        MessageResponsePacket messageResponsePacket = new MessageResponsePacket();
-        System.out.println(String.format("%s : 收到客户端消息 : %s", LocalDateTime.now(), msg.getMessage()));
+    protected void channelRead0(ChannelHandlerContext ctx, MessageRequestPacket messageRequestPacket) throws Exception {
+        // 1.拿到消息发送方的会话信息
+        Session session = SessionUtil.getSession(ctx.channel());
 
-        messageResponsePacket.setMessage(String.format("服务端回复【%s】", msg.getMessage()));
-        ctx.channel().writeAndFlush(messageResponsePacket);
+        // 2.通过消息发送方的会话信息构造要发送的消息
+        MessageResponsePacket messageResponsePacket = new MessageResponsePacket();
+        messageResponsePacket.setFromUserId(session.getUserId());
+        messageResponsePacket.setFromUserName(session.getUserName());
+        messageResponsePacket.setMessage(messageRequestPacket.getMessage());
+
+        // 3.拿到消息接收方的channel
+        Channel toUserChannel = SessionUtil.getChannel(messageRequestPacket.getToUserId());
+
+        // 4.将消息发送给消息接受方
+        if(toUserChannel != null && SessionUtil.hasLogin(ctx.channel())) {
+            toUserChannel.writeAndFlush(messageResponsePacket);
+        }else {
+            System.err.println(String.format("[%s]不在线，发送失败", messageRequestPacket.getToUserId()));
+        }
     }
 }
